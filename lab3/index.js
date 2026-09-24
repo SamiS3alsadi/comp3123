@@ -1,0 +1,49 @@
+// index.js
+var http = require("http");
+// Import Employee Module
+const employeeModule = require("./Employee");
+
+console.log("Lab 03 - NodeJs");
+
+// Define Server Port
+const port = process.env.PORT || 8081;
+
+// Create Web Server using CORE API
+const server = http.createServer((req, res) => {
+    if (req.method !== 'GET') {
+        res.writeHead(405, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: http.STATUS_CODES[405] }));
+    }
+
+    if (req.url === '/') {
+        // Display welcome message in HTML format
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        return res.end("<h1>Welcome to Lab Exercise 03</h1>");
+    }
+
+    if (req.url === '/employee') {
+        // Display all details for employees in JSON format
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify(employeeModule.getAllEmployees()));
+    }
+
+    if (req.url === '/employee/names') {
+        // Display all employee {first name + last name} in Ascending order in JSON Array
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify(employeeModule.getEmployeeNames()));
+    }
+
+    if (req.url === '/employee/totalsalary') {
+        // Display Sum of all employees salary in given JSON format
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ total_salary: employeeModule.getTotalSalary() }));
+    }
+
+    // Default 404 response for unmatched URLS
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: http.STATUS_CODES[404] }));
+});
+
+server.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+});
