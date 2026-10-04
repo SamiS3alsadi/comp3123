@@ -1,34 +1,74 @@
-const express = require("express");
-const app = express();
+/*
+  COMP3123 - exec04
+  - Serve multiple paths from an Express server using routes
+  - Serve a static html file
+  - Extract GET params (compare with GET query)
+*/
 
-app.use(express.json());
+const express = require("express")
+const app = express()
 
-// serve static files from /public  (instruction.html -> /instruction.html)
-app.use(express.static("public"));
+const SERVER_PORT = process.env.PORT || 3000
 
-// GET /hello
-app.get("/hello", (req, res) => {
-  res.type("text/plain").send("Hello Express JS");
-});
+// ----------------------- Set up middleware for Express -----------------------
+// Serve static files: public/instruction.html -> localhost:3000/instruction.html
+app.use(express.static("public"))
 
-// GET /user?firstname=&lastname=
-app.get("/user", (req, res) => {
-  const firstname = req.query.firstname || "Pritesh";
-  const lastname = req.query.lastname || "Patel";
-  res.json({ firstname, lastname });
-});
+// Serve JSON
+app.use(express.json())
 
-// POST /user/:firstname/:lastname
-app.post("/user/:firstname/:lastname", (req, res) => {
-  const { firstname, lastname } = req.params;
-  res.json({ firstname, lastname });
-});
+// Read URL params or queries
+// extended: true lets us use the qs library
+app.use(express.urlencoded({ extended: true }))
+// -----------------------------------------------------------------------------
 
-// POST /users  - expects an array of { firstname, lastname }
-app.post("/users", (req, res) => {
-  const users = Array.isArray(req.body) ? req.body : [];
-  res.json(users);
-});
+app.get("/", (request, response) => {
+    response.send("<h1>COMP3123 exec04 - Express server</h1>")
+})
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// GET /hello  -> plain text
+app.get("/hello", (request, response) => {
+    response.type("text/plain").send("Hello Express JS")
+})
+
+// GET /user?firstname=&lastname=   (query parameters)
+app.get("/user", (request, response) => {
+    console.log(request.query)
+
+    // spec: when the parameters are not provided, fall back to these defaults
+    const firstname = request.query.firstname || "Pritesh"
+    const lastname = request.query.lastname || "Patel"
+
+    response.json({ firstname, lastname })
+})
+
+// POST /user/:firstname/:lastname   (path parameters)
+app.post("/user/:firstname/:lastname", (request, response) => {
+    console.log(request.params)
+
+    const { firstname, lastname } = request.params
+
+    if (!firstname || !lastname) {
+        return response.status(400).json({ error: "You must pass in firstname and lastname" })
+    }
+
+    response.json({ firstname, lastname })
+})
+
+// POST /users   (body - array of users)
+app.post("/users", (request, response) => {
+    const users = request.body
+    console.log(users)
+
+    if (!Array.isArray(users)) {
+        return response.status(400).json({ error: "Body must be an array of users" })
+    }
+
+    response.json(users)
+})
+
+// -----------------------------------------------------------------------------
+
+app.listen(SERVER_PORT, () => {
+    console.log("Server is running on http://localhost:" + SERVER_PORT)
+})
