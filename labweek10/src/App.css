@@ -1,0 +1,11 @@
+.form-box {
+  border: 3px solid green;
+}
+
+.output-box {
+  border: 3px solid green;
+}
+
+.output-box th {
+  width: 30%;
+}
